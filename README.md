@@ -4,8 +4,8 @@ arangodb-scala-driver
 [![Build Status](https://travis-ci.org/acme-software/arangodb-scala-driver.svg?branch=master)](https://travis-ci.org/acme-software/arangodb-scala-driver) 
 ![GitHub](https://img.shields.io/github/license/acme-software/arangodb-scala-driver.svg)
 
-**[ArangoDB](https://www.arangodb.com) driver for [Scala](https://scala-lang.org). Right now, it's basically the 
-[arangodb-driver-java-async](https://github.com/arangodb/arangodb-java-driver-async), wrapped into an tagless-final 
+**Ideomatic [ArangoDB](https://www.arangodb.com) driver for [Scala](https://scala-lang.org). Right now, it's basically 
+the [arangodb-driver-java-async](https://github.com/arangodb/arangodb-java-driver-async), wrapped into an tagless-final 
 DSL (`F[_]`).**
 
 *This library is under heavy development until v1.0.0 and therefore not ready for production!*
@@ -23,7 +23,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 case class Test(_key: String, name: String)
 
 object Test {
-  // Use DocumentCodec.derive[T] from one of the supported json libs or implement a codec using DocumentCodec.of[T]
+  // Use DocumentCodec.derive[T] from one of the supported json libs 
+  // or implement a codec using DocumentCodec.of[T]
   implicit val codec: DocumentCodec[Test] = ???
 }
 
@@ -114,8 +115,8 @@ Add the imports:
 ```scala
 import ch.acmesoftware.arangodbscaladriver._
 
-// add circe support
-import ch.acmesoftware.arangodbscaladriver.circe._
+// circe support
+import ch.acmesoftware.arangodbscaladriver.circe
 
 implicit val codec = DocumentCodec.derive[Test]
 
