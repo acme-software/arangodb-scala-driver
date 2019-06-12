@@ -110,7 +110,7 @@ Add the imports:
 import ch.acmesoftware.arangodbscaladriver._
 
 // circe support
-import ch.acmesoftware.arangodbscaladriver.circe
+import ch.acmesoftware.arangodbscaladriver.circe._
 
 implicit val codec = DocumentCodec.derive[Test]
 
