@@ -82,8 +82,13 @@ libraryDependencies ++= Seq(
 )
 ```
  
-The versioning scheme follows the ArangoDB version, to which the lib is compiled against. Check the 
-[arangodb-java-driver-async releases](https://github.com/arangodb/arangodb-java-driver-async/releases) for details.
+The lib follows [semantic versioning](https://semver.org/) while majors can be mapped to the underlying ArangoDB driver 
+version:
+
+| Library Version | ArangoDB Driver Version |
+|-----------------|-------------------------|
+| 0.x.x           | 5.x.x                   |
+| 1.x.x           | 5.x.x                   |
 
 Usage
 -----
