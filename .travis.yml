@@ -9,14 +9,24 @@ jdk:
   - openjdk8
   - openjdk11
 
+env:
+  - ARANGO_VERSION=3.3
+  - ARANGO_VERSION=3.4
+
+services:
+  - docker
+
+branches:
+  only:
+    - master
+
 matrix:
   allow_failures:
     - scala: 2.13.0
-      jdk: oraclejdk8
-    - scala: 2.13.0
-      jdk: openjdk8
-    - scala: 2.13.0
-      jdk: openjdk11
+
+before_install:
+  - docker pull arangodb
+  - "docker run -d -e ARANGO_ROOT_PASSWORD=root -p 127.0.0.1:8529:8529 arangodb:$ARANGO_VERSION"
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION test

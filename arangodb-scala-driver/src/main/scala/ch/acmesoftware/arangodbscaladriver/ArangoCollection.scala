@@ -11,6 +11,8 @@ import scala.language.higherKinds
 
 trait ArangoCollection[F[_]] {
 
+  def name(): String
+
   def insertDocument[T](document: T,
                         createOptions: DocumentCreateOptions = new DocumentCreateOptions)
                        (implicit codec: DocumentCodec[T]): F[Unit]
@@ -24,6 +26,9 @@ private[arangodbscaladriver] object ArangoCollection {
 
   def interpreter[F[_] : Async](unwrap: ar.ArangoCollectionAsync)
                                (implicit ec: ExecutionContext): ArangoCollection[F] = new ArangoCollection[F] {
+
+    override def name(): String =
+      unwrap.name()
 
     override def insertDocument[T](document: T,
                                    createOptions: DocumentCreateOptions)
