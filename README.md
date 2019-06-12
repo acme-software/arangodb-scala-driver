@@ -1,6 +1,9 @@
 arangodb-scala-driver
 =====================
 
+[![Build Status](https://travis-ci.org/acme-software/arangodb-scala-driver.svg?branch=master)](https://travis-ci.org/acme-software/arangodb-scala-driver) 
+![GitHub](https://img.shields.io/github/license/acme-software/arangodb-scala-driver.svg)
+
 **[ArangoDB](https://www.arangodb.com) driver for [Scala](https://scala-lang.org). Right now, it's basically the 
 [arangodb-driver-java-async](https://github.com/arangodb/arangodb-java-driver-async), wrapped into an tagless-final 
 DSL (`F[_]`).**
