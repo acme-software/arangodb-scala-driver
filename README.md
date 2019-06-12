@@ -90,16 +90,6 @@ Usage
 A `DocumentCodec` is needed to serialize/deserialize JSON, which is in turn used by ArangoDB. You can provide an 
 implicit `DocumentCodec` in two different ways:
 
-**By implementing it (not recommended)**
-
-```scala
-import ch.acmesoftware.arangodbscaladriver._
-
-case class Test(name: String)
-
-DocumentCodec.of[Test](e => s"""{ name: "${e.name}" }""", str => Left(new RuntimeException("Not deserializable")))
-```
-
 **By using one of the supported JSON libs**
 
 You can just use e.g. [circe]() by adding the appropriate dependency:
@@ -121,6 +111,19 @@ import ch.acmesoftware.arangodbscaladriver.circe
 
 implicit val codec = DocumentCodec.derive[Test]
 
+```
+
+**By implementing it (not recommended)**
+
+```scala
+import ch.acmesoftware.arangodbscaladriver._
+
+case class Test(name: String)
+
+DocumentCodec.of[Test](
+  e => s"""{ name: "${e.name}" }""", 
+  str => Left(new RuntimeException("Not deserializable"))
+)
 ```
 
 Disclaimer
