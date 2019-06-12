@@ -2,7 +2,12 @@ name := "arangodb-scala-driver"
 
 lazy val commonSettings = Seq(
   organization := "ch.acmesoftware",
-  scalaVersion := "2.12.8"
+  scalaVersion := "2.12.8",
+  crossScalaVersions := Seq(
+    "2.11.12",
+    "2.12.8",
+    "2.13.0"
+  )
 )
 
 lazy val `arangodb-scala-driver` = (project in file("arangodb-scala-driver"))
