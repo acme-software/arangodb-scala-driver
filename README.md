@@ -64,13 +64,13 @@ which satisfies `cats.effect.Sync[F]`. In the examples, `cats.effect.IO` is used
 
 Beside that, one key point during API design was to keep is as similar as possible to 
 [arangodb-driver-java](https://github.com/arangodb/arangodb-java-driver). This simplifies documentation, usability and 
-the upgrad path for future ArangoDB versions.
+the upgrade path for future ArangoDB versions.
 
-In the examples, the global Scala `ExecuritionContext` is used. For production purposes, please create your own and pass 
+In the examples, the global Scala `ExecutionContext` is used. For production purposes, please create your own and pass 
 it either implicitly or explicit.
 
-Installation
-------------
+Installation & Version
+----------------------
 
 Add dependencies to SBT build:
 
@@ -82,6 +82,9 @@ libraryDependencies ++= Seq(
 )
 ```
  
+The versioning scheme follows the ArangoDB version, to which the lib is compiled against. Check the 
+[arangodb-java-driver-async releases](https://github.com/arangodb/arangodb-java-driver-async/releases) for details.
+
 Usage
 -----
 
