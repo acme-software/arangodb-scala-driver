@@ -11,12 +11,19 @@ class CollectionRoundtripSpec extends FlatSpec with Matchers {
   "Collections" should "be defined and be deletable again" in {
     val app = for {
       arango <- ArangoDBBuilder.interpreter[IO].build("127.0.0.1", 8529, "root", "root")
+
       db <- arango.db("test-db")
+
       dbName = db.name()
+
       collection <- db.collection("test-collection")
+
       colName = collection.name()
+
       _ <- db.drop()
+
       dbExistsAfterDrop <- arango.dbExists("test-db")
+
     } yield (dbName, colName, dbExistsAfterDrop)
 
     val res = app.unsafeRunSync()
