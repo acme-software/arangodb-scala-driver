@@ -12,6 +12,7 @@ lazy val commonSettings = Seq(
 lazy val sharedDependencies = Seq(
   "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0",
   "org.typelevel" %% "cats-effect" % "1.3.1",
+  //"org.typelevel" %% "mouse" % "0.21",
   "org.slf4j" % "slf4j-api" % "1.7.13",
   "org.scalactic" %% "scalactic" % "3.0.5",
   "org.scalatest" %% "scalatest" % "3.0.5" % Test,
