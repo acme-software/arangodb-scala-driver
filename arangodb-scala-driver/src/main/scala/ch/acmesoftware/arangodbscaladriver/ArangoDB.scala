@@ -1,6 +1,7 @@
 package ch.acmesoftware.arangodbscaladriver
 
 import cats.effect.Async
+import com.arangodb.ArangoDBAsync
 import com.{arangodb => ar}
 
 import scala.compat.java8.FutureConverters._
@@ -8,6 +9,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.language.higherKinds
 
 trait ArangoDB[F[_]] {
+
+  /** Access to underlying java driver */
+  def unwrap: ar.ArangoDBAsync
 
   /** Returns a database representation (and creates it if it does not exist)
     *
@@ -21,12 +25,14 @@ trait ArangoDB[F[_]] {
 
 private[arangodbscaladriver] object ArangoDB {
 
-  def interpreter[F[_] : Async](unwrap: ar.ArangoDBAsync)
+  def interpreter[F[_] : Async](wrapped: ar.ArangoDBAsync)
                                (implicit ec: ExecutionContext): ArangoDB[F] = new ArangoDB[F] {
+
+    override def unwrap: ArangoDBAsync = wrapped
 
     override def db(name: String): F[ArangoDatabase[F]] = Async[F].async { cb =>
 
-      val db = unwrap.db(name)
+      val db = wrapped.db(name)
 
       val dbFuture = for {
         exists <- db.exists().toScala
@@ -38,7 +44,7 @@ private[arangodbscaladriver] object ArangoDB {
     }
 
     override def dbExists(name: String): F[Boolean] = Async[F].async { cb =>
-      unwrap.db(name).exists().toScala
+      wrapped.db(name).exists().toScala
         .map(Boolean.unbox)
         .onComplete(e => cb(e.toEither))
     }

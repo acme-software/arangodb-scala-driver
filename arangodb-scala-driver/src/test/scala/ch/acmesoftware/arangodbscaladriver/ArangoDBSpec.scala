@@ -47,4 +47,12 @@ class ArangoDBSpec extends FlatSpec with Matchers with MockFactory {
 
     res.name() shouldEqual "test"
   }
+
+  it should "provide access to underlying driver" in {
+
+    val arangoDbMock = mock[ArangoDBAsync]
+    val sut = ArangoDB.interpreter[IO](arangoDbMock)
+
+    sut.unwrap shouldEqual arangoDbMock
+  }
 }
