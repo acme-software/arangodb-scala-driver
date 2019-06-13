@@ -15,6 +15,8 @@ trait ArangoDB[F[_]] {
     * @return The wrapped database
     */
   def db(name: String): F[ArangoDatabase[F]]
+
+  def dbExists(name: String): F[Boolean]
 }
 
 private[arangodbscaladriver] object ArangoDB {
@@ -28,11 +30,17 @@ private[arangodbscaladriver] object ArangoDB {
 
       val dbFuture = for {
         exists <- db.exists().toScala
-        created <- if(!exists) db.create().toScala.map(_.booleanValue()) else Future.successful(true)
-        db <- if(created) Future.successful(db) else Future.failed(new RuntimeException(s"Could not create db ${db.name()}"))
+        created <- if (!exists) db.create().toScala.map(_.booleanValue()) else Future.successful(true)
+        db <- if (created) Future.successful(db) else Future.failed(new RuntimeException(s"Could not create db ${db.name()}"))
       } yield db
 
       dbFuture.onComplete(e => cb(e.toEither.map(ArangoDatabase.interpreter(_))))
+    }
+
+    override def dbExists(name: String): F[Boolean] = Async[F].async { cb =>
+      unwrap.db(name).exists().toScala
+        .map(Boolean.unbox)
+        .onComplete(e => cb(e.toEither))
     }
   }
 }
