@@ -1,7 +1,7 @@
 package ch.acmesoftware.arangodbscaladriver
 
 import cats.effect.Async
-import com.arangodb.ArangoCollectionAsync
+import com.arangodb.{ArangoCollectionAsync, ArangoDatabaseAsync}
 import com.arangodb.entity.DatabaseEntity
 import com.arangodb.model.CollectionCreateOptions
 import com.{arangodb => ar}
@@ -11,6 +11,9 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.language.higherKinds
 
 trait ArangoDatabase[F[_]] {
+
+  /** Access to underlying java driver */
+  def unwrap: ar.ArangoDatabaseAsync
 
   /** Returns db name
     *
@@ -37,26 +40,28 @@ trait ArangoDatabase[F[_]] {
 
 private[arangodbscaladriver] object ArangoDatabase {
 
-  def interpreter[F[_] : Async](unwrap: ar.ArangoDatabaseAsync)
+  def interpreter[F[_] : Async](wrapped: ar.ArangoDatabaseAsync)
                                (implicit ec: ExecutionContext): ArangoDatabase[F] = new ArangoDatabase[F] {
 
+    override def unwrap: ArangoDatabaseAsync = wrapped
+
     override def name(): String =
-      unwrap.name()
+      wrapped.name()
 
     override def info(): F[DatabaseEntity] = Async[F].async { cb =>
-      unwrap.getInfo.toScala.onComplete(e => cb(e.toEither))
+      wrapped.getInfo.toScala.onComplete(e => cb(e.toEither))
     }
 
     override def drop(): F[Unit] = Async[F].async { cb =>
-      unwrap.drop().toScala
-        .map(assert(_, s"Could not drop database ${unwrap.name()}"))
+      wrapped.drop().toScala
+        .map(assert(_, s"Could not drop database ${wrapped.name()}"))
         .onComplete(e => cb(e.toEither))
     }
 
     override def collection(name: String,
                             createOptions: Option[CollectionCreateOptions] = None): F[ArangoCollection[F]] =
       Async[F].async { cb =>
-        val c: ArangoCollectionAsync = unwrap.collection(name)
+        val c: ArangoCollectionAsync = wrapped.collection(name)
 
         val created: Future[ArangoCollection[F]] = for {
           exists <- c.exists().toScala

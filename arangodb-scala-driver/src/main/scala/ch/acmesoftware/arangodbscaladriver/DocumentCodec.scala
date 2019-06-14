@@ -1,11 +1,17 @@
 package ch.acmesoftware.arangodbscaladriver
 
+import cats.implicits._
+
 trait DocumentCodec[T] {
 
   def toJson(doc: T): String
 
   def fromJson(str: String): Either[Throwable, T]
 
+  def fromJson(strOpt: Option[String]): Either[Throwable, Option[T]] = strOpt match {
+    case Some(str) => fromJson(str).map(_.some)
+    case None => Right(None)
+  }
 }
 
 object DocumentCodec {

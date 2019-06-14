@@ -11,8 +11,10 @@ DSL (`F[_]`).**
 
 *This library is under heavy development until v1.0.0 and therefore not ready for production!*
 
-Example with `cats.effect.IO`
------------------------------
+Example
+-------
+
+Example app using `cats.effect.IO` as effect type:
 
 ```scala
 import cats.effect._
