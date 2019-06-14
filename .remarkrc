@@ -1,5 +1,7 @@
-"remarkConfig": {
-  "plugins": [
-    "lint"
-  ]
+{
+    "plugins": {
+        "remark-lint": {
+              "maximum-line-length": ["error", 121]
+        }
+    }
 }

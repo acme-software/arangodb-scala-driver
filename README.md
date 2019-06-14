@@ -2,8 +2,9 @@ arangodb-scala-driver
 =====================
 
 [![Build Status](https://travis-ci.org/acme-software/arangodb-scala-driver.svg?branch=master)](https://travis-ci.org/acme-software/arangodb-scala-driver) 
+[![Known Vulnerabilities](https://snyk.io//test/github/acme-software/arangodb-scala-driver/badge.svg?targetFile=build.sbt)](https://snyk.io//test/github/acme-software/arangodb-scala-driver?targetFile=build.sbt) 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8196588199ae4f1993bc92d82f4683a5)](https://www.codacy.com/app/frne/arangodb-scala-driver?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=acme-software/arangodb-scala-driver&amp;utm_campaign=Badge_Grade) 
 ![GitHub](https://img.shields.io/github/license/acme-software/arangodb-scala-driver.svg) 
-[![Known Vulnerabilities](https://snyk.io//test/github/acme-software/arangodb-scala-driver/badge.svg?targetFile=build.sbt)](https://snyk.io//test/github/acme-software/arangodb-scala-driver?targetFile=build.sbt)
 
 **Ideomatic [ArangoDB](https://www.arangodb.com) driver for [Scala](https://scala-lang.org). Right now, it's basically 
 the [arangodb-driver-java-async](https://github.com/arangodb/arangodb-java-driver-async), wrapped into an tagless-final 
