@@ -1,15 +1,15 @@
 package ch.acmesoftware.arangodbscaladriver
 
 import cats.effect.Async
+import cats.implicits._
 import ch.acmesoftware.arangodbscaladriver.Domain.ArangoError
 import com.arangodb.ArangoCollectionAsync
-import com.arangodb.entity.{DocumentDeleteEntity, ErrorEntity}
-import com.arangodb.model.{DocumentCreateOptions, DocumentDeleteOptions, DocumentReadOptions, DocumentReplaceOptions}
+import com.arangodb.entity.{DocumentDeleteEntity, ErrorEntity, IndexEntity}
+import com.arangodb.model._
 import com.{arangodb => ar}
 
 import scala.collection.JavaConverters._
-import scala.compat.java8.FutureConverters._
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
 
 trait ArangoCollection[F[_]] {
@@ -44,6 +44,23 @@ trait ArangoCollection[F[_]] {
   def deleteDocuments[T](keys: Iterable[String],
                          deleteOptions: DocumentDeleteOptions = new DocumentDeleteOptions)
                         (implicit codec: DocumentCodec[T]): F[Iterable[Either[Throwable, DocumentDeleteEntity[T]]]]
+
+  def documentExists(key: String,
+                     options: DocumentExistsOptions = new DocumentExistsOptions): F[Boolean]
+
+  def getIndex(id: String): F[Option[IndexEntity]]
+
+  def deleteIndex(id: String): F[Unit]
+
+  def ensureHashIndex(fields: Iterable[String], options: HashIndexOptions): F[IndexEntity]
+
+  def ensureSkiplistIndex(fields: Iterable[String], options: SkiplistIndexOptions): F[IndexEntity]
+
+  def ensurePersistentIndex(fields: Iterable[String], options: PersistentIndexOptions): F[IndexEntity]
+
+  def ensureGeoIndex(fields: Iterable[String], options: GeoIndexOptions): F[IndexEntity]
+
+  def ensureFulltextIndex(fields: Iterable[String], options: FulltextIndexOptions): F[IndexEntity]
 }
 
 private[arangodbscaladriver] object ArangoCollection {
@@ -61,63 +78,100 @@ private[arangodbscaladriver] object ArangoCollection {
 
     override def insertDocument[T](document: T,
                                    createOptions: DocumentCreateOptions)
-                                  (implicit codec: DocumentCodec[T]): F[Unit] = Async[F].async { cb =>
-      wrapped.insertDocument(codec.toJson(document), createOptions)
-        .toScala
-        .map(_ => ())
-        .onComplete(e => cb(e.toEither))
-    }
+                                  (implicit codec: DocumentCodec[T]): F[Unit] =
+      discardedAsyncF {
+        wrapped.insertDocument(codec.toJson(document), createOptions)
+      }
 
     override def insertDocuments[T](documents: Iterable[T], createOptions: DocumentCreateOptions)
-                                   (implicit codec: DocumentCodec[T]): F[Unit] = Async[F].async { cb =>
-      wrapped.insertDocuments(documents.map(codec.toJson).asJavaCollection, createOptions)
-        .toScala
-        .map(_ => ())
-        .onComplete(e => cb(e.toEither))
-    }
+                                   (implicit codec: DocumentCodec[T]): F[Unit] =
+      discardedAsyncF {
+        wrapped.insertDocuments(documents.map(codec.toJson).asJavaCollection, createOptions)
+      }
 
     override def getDocument[K, T](key: K,
                                    readOptions: DocumentReadOptions = new DocumentReadOptions)
-                                  (implicit codec: DocumentCodec[T]): F[Option[T]] = Async[F].async { cb =>
-      wrapped.getDocument(key.toString, classOf[String], readOptions)
-        .toScala
-        .map(Option.apply) // catch nulls
-        .map(codec.fromJson(_).toTry)
-        .onComplete(e => cb(e.flatten.toEither))
-    }
+                                  (implicit codec: DocumentCodec[T]): F[Option[T]] =
+      asyncF[F, String] {
+        wrapped.getDocument(key.toString, classOf[String], readOptions)
+      }
+        .map(Option.apply)
+        .map {
+          case Some(e) => codec.fromJson(e).map(_.some)
+          case None => Right(None)
+        }
+        .flatMap(_.liftTo[F])
 
     override def getDocuments[K, T](keys: Iterable[K],
                                     readOptions: DocumentReadOptions)
-                                   (implicit codec: DocumentCodec[T]): F[Iterable[Either[Throwable, T]]] = Async[F].async { cb =>
-      wrapped.getDocuments(keys.map(_.toString).asJavaCollection, classOf[String], readOptions)
-        .toScala
-        .map(_.getDocumentsAndErrors
-          .asScala
-          .map {
-            case e: ErrorEntity => Left(ArangoError(e))
-            case r: String => codec.fromJson(r)
-          }
-        ).onComplete(e => cb(e.toEither))
-    }
+                                   (implicit codec: DocumentCodec[T]): F[Iterable[Either[Throwable, T]]] =
+      asyncF {
+        wrapped.getDocuments(keys.map(_.toString).asJavaCollection, classOf[String], readOptions)
+      }.map(_.getDocumentsAndErrors
+        .asScala
+        .map {
+          case e: ErrorEntity => Left(ArangoError(e))
+          case r: String => codec.fromJson(r)
+        }
+      )
 
     override def deleteDocument[T](key: String,
                                    deleteOptions: DocumentDeleteOptions)
-                                  (implicit codec: DocumentCodec[T]): F[DocumentDeleteEntity[T]] = Async[F].async { cb =>
-      wrapped.deleteDocument(key, classOf[String], deleteOptions)
-        .toScala
-        .onComplete(e => cb(e.toEither.flatMap(_.eitherT)))
-    }
+                                  (implicit codec: DocumentCodec[T]): F[DocumentDeleteEntity[T]] =
+      asyncF[F, DocumentDeleteEntity[String]] {
+        wrapped.deleteDocument(key, classOf[String], deleteOptions)
+      }.flatMap(_.eitherT[T].liftTo[F])
 
     override def deleteDocuments[T](keys: Iterable[String],
                                     deleteOptions: DocumentDeleteOptions)
-                                   (implicit codec: DocumentCodec[T]): F[Iterable[Either[Throwable, DocumentDeleteEntity[T]]]] = Async[F].async { cb =>
-      val x: Future[Iterable[Either[Throwable, DocumentDeleteEntity[T]]]] = wrapped.deleteDocuments(keys.map(_.toString).asJavaCollection, classOf[String], deleteOptions)
-        .toScala
-        .map(e => e.getDocumentsAndErrors.asScala.map {
-          case e: ErrorEntity => Left(ArangoError(e))
-          case r: DocumentDeleteEntity[String] => r.eitherT
-        })
-    }
+                                   (implicit codec: DocumentCodec[T]): F[Iterable[Either[Throwable, DocumentDeleteEntity[T]]]] =
+      asyncF {
+        wrapped.deleteDocuments(keys.map(_.toString).asJavaCollection, classOf[String], deleteOptions)
+      }.map(e => e.getDocumentsAndErrors.asScala.map {
+        case e: ErrorEntity => Left(ArangoError(e))
+        case r: DocumentDeleteEntity[String] => r.eitherT
+      })
+
+    override def documentExists(key: String,
+                                options: DocumentExistsOptions): F[Boolean] =
+      asyncF {
+        wrapped.documentExists(key, options)
+      }.map(Boolean.unbox)
+
+    override def getIndex(id: String): F[Option[IndexEntity]] =
+      asyncF[F, IndexEntity] {
+        wrapped.getIndex(id)
+      }.map(Option.apply)
+
+    override def deleteIndex(id: String): F[Unit] =
+      discardedAsyncF {
+        wrapped.deleteIndex(id)
+      }
+
+    override def ensureHashIndex(fields: Iterable[String], options: HashIndexOptions): F[IndexEntity] =
+      asyncF {
+        wrapped.ensureHashIndex(fields.asJava, options)
+      }
+
+    override def ensureSkiplistIndex(fields: Iterable[String], options: SkiplistIndexOptions): F[IndexEntity] =
+      asyncF {
+        wrapped.ensureSkiplistIndex(fields.asJava, options)
+      }
+
+    override def ensurePersistentIndex(fields: Iterable[String], options: PersistentIndexOptions): F[IndexEntity] =
+      asyncF {
+        wrapped.ensurePersistentIndex(fields.asJava, options)
+      }
+
+    override def ensureGeoIndex(fields: Iterable[String], options: GeoIndexOptions): F[IndexEntity] =
+      asyncF {
+        wrapped.ensureGeoIndex(fields.asJava, options)
+      }
+
+    override def ensureFulltextIndex(fields: Iterable[String], options: FulltextIndexOptions): F[IndexEntity] =
+      asyncF {
+        wrapped.ensureFulltextIndex(fields.asJava, options)
+      }
   }
 
 }
