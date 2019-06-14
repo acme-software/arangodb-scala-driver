@@ -7,8 +7,8 @@ arangodb-scala-driver
 ![GitHub](https://img.shields.io/github/license/acme-software/arangodb-scala-driver.svg) 
 
 **Ideomatic [ArangoDB](https://www.arangodb.com) driver for [Scala](https://scala-lang.org). Right now, it's basically 
-the [arangodb-driver-java-async](https://github.com/arangodb/arangodb-java-driver-async), wrapped into an tagless-final 
-DSL (`F[_]`).**
+the [arangodb-driver-java-async](https://github.com/arangodb/arangodb-java-driver-async), wrapped into a tagless-final 
+DSL `F[_]`.**
 
 *This library is under heavy development until v1.0.0 and therefore not ready for production!*
 
