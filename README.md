@@ -1,6 +1,7 @@
 arangodb-scala-driver
 =====================
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c74f87e7f8b14dd0b099c364d5552be9)](https://app.codacy.com/app/frne/arangodb-scala-driver?utm_source=github.com&utm_medium=referral&utm_content=acme-software/arangodb-scala-driver&utm_campaign=Badge_Grade_Dashboard)
 [![Build Status](https://travis-ci.org/acme-software/arangodb-scala-driver.svg?branch=master)](https://travis-ci.org/acme-software/arangodb-scala-driver) 
 ![GitHub](https://img.shields.io/github/license/acme-software/arangodb-scala-driver.svg) 
 [![Known Vulnerabilities](https://snyk.io//test/github/acme-software/arangodb-scala-driver/badge.svg?targetFile=build.sbt)](https://snyk.io//test/github/acme-software/arangodb-scala-driver?targetFile=build.sbt)
