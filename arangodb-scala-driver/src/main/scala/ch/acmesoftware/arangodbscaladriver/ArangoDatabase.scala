@@ -3,7 +3,7 @@ package ch.acmesoftware.arangodbscaladriver
 import cats.effect.Async
 import cats.implicits._
 import com.arangodb.entity._
-import com.arangodb.model.CollectionCreateOptions
+import com.arangodb.model.{AqlQueryExplainOptions, AqlQueryOptions, CollectionCreateOptions}
 import com.arangodb.{ArangoCollectionAsync, ArangoDatabaseAsync}
 import com.{arangodb => ar}
 
@@ -12,6 +12,10 @@ import scala.compat.java8.FutureConverters._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.higherKinds
 
+/** Scala wrapper for [[ar.ArangoDatabaseAsync]]
+  *
+  * @tparam F The effect type
+  */
 trait ArangoDatabase[F[_]] {
 
   /** Access to underlying java driver */
@@ -93,7 +97,17 @@ trait ArangoDatabase[F[_]] {
     */
   def info: F[DatabaseEntity]
 
+  def query[T](query: String,
+               bindVars: Map[String, Any] = Map.empty,
+               options: AqlQueryOptions = new AqlQueryOptions)
+              (implicit codec: DocumentCodec[T]): F[ArangoCursor[T]]
 
+  def cursor[T](cursorId: String)
+               (implicit codec: DocumentCodec[T]): F[Option[ArangoCursor[T]]]
+
+  def explainQuery(query: String,
+                   bindVars: Map[String, Any] = Map.empty,
+                   options: AqlQueryExplainOptions = new AqlQueryExplainOptions): F[AqlExecutionExplainEntity]
 }
 
 private[arangodbscaladriver] object ArangoDatabase {
@@ -170,6 +184,30 @@ private[arangodbscaladriver] object ArangoDatabase {
 
     override def info: F[DatabaseEntity] =
       asyncF(wrapped.getInfo)
+
+    override def query[T](query: String,
+                          bindVars: Map[String, Any],
+                          options: AqlQueryOptions)
+                         (implicit codec: DocumentCodec[T]): F[ArangoCursor[T]] =
+      asyncF {
+        wrapped.query(
+          query,
+          valueMapAnyToJava(bindVars),
+          options,
+          classOf[String]
+        )
+      }.map(ArangoCursor.interpreter(_))
+
+    override def cursor[T](cursorId: String)
+                          (implicit codec: DocumentCodec[T]): F[Option[ArangoCursor[T]]] =
+      asyncF(wrapped.cursor(cursorId, classOf[String])).map(
+        Option(_).map(ArangoCursor.interpreter(_))
+      )
+
+    override def explainQuery(query: String,
+                              bindVars: Map[String, Any],
+                              options: AqlQueryExplainOptions): F[AqlExecutionExplainEntity] =
+      asyncF(wrapped.explainQuery(query, valueMapAnyToJava(bindVars), options))
 
   }
 }
