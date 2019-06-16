@@ -20,7 +20,9 @@ lazy val sharedDependencies = Seq(
 
 lazy val root = (project in file("."))
   .settings(
-    commonSettings
+    commonSettings,
+    publishArtifact := false,
+    publishTo := Some(Resolver.file("Unused transient repository", file("target/unusedrepo")))
   ).aggregate(`arangodb-scala-driver`, `arangodb-scala-driver-circe`)
 
 lazy val `arangodb-scala-driver` = (project in file("arangodb-scala-driver"))
@@ -44,6 +46,8 @@ lazy val `arangodb-scala-driver-circe` = (project in file("arangodb-scala-driver
 lazy val integrationtest = (project in file("integrationtest"))
   .settings(
     commonSettings,
+    publishArtifact := false,
+    publishTo := Some(Resolver.file("Unused transient repository", file("target/unusedrepo"))),
     libraryDependencies ++= sharedDependencies
   )
   .dependsOn(`arangodb-scala-driver`, `arangodb-scala-driver-circe`)
