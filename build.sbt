@@ -1,5 +1,3 @@
-name := "arangodb-scala-driver"
-
 lazy val commonSettings = Seq(
   organization := "ch.acmesoftware",
   scalaVersion := "2.12.8",
@@ -18,6 +16,11 @@ lazy val sharedDependencies = Seq(
   "org.scalatest" %% "scalatest" % "3.0.5" % Test,
   "org.scalamock" %% "scalamock" % "4.1.0" % Test
 )
+
+lazy val root = (project in file("."))
+  .settings(
+    commonSettings
+  ).aggregate(`arangodb-scala-driver`, `arangodb-scala-driver-circe`)
 
 lazy val `arangodb-scala-driver` = (project in file("arangodb-scala-driver"))
   .settings(
