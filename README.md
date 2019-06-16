@@ -1,11 +1,11 @@
 arangodb-scala-driver
 =====================
 
-![Maven Central](https://img.shields.io/maven-central/v/ch.acmesoftware/arangodb-scala-driver_2.12.svg) 
+[![Maven Central](https://img.shields.io/maven-central/v/ch.acmesoftware/arangodb-scala-driver_2.12.svg)](https://search.maven.org/search?q=g:ch.acmesoftware%20a:arangodb-scala-driver*)
 [![Build Status](https://travis-ci.org/acme-software/arangodb-scala-driver.svg?branch=master)](https://travis-ci.org/acme-software/arangodb-scala-driver) 
 [![Known Vulnerabilities](https://snyk.io//test/github/acme-software/arangodb-scala-driver/badge.svg?targetFile=build.sbt)](https://snyk.io//test/github/acme-software/arangodb-scala-driver?targetFile=build.sbt) 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8196588199ae4f1993bc92d82f4683a5)](https://www.codacy.com/app/frne/arangodb-scala-driver?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=acme-software/arangodb-scala-driver&amp;utm_campaign=Badge_Grade) 
-![GitHub](https://img.shields.io/github/license/acme-software/arangodb-scala-driver.svg) 
+[![MIT License](https://img.shields.io/github/license/acme-software/arangodb-scala-driver.svg)](LICENSE.txt)
 
 **Idiomatic [ArangoDB](https://www.arangodb.com) driver for [Scala](https://scala-lang.org) as Tagless-Final DSL.**
 
