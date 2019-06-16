@@ -24,16 +24,16 @@ package object querydsl {
 
   case class FilterClause(parent: QueryPart, fieldName: String) extends QueryPart {
 
-    private lazy val _q = parent.q + s""" FILTER $fieldName"""
+    private lazy val query = parent.q + s""" FILTER $fieldName"""
 
-    override def q() = _q
+    override def q() = query
 
     def eq(value: String): QueryClause = QueryClause(new QueryPart {
-      override def q: String = _q + s""" == $value"""
+      override def q: String = query + s""" == $value"""
     })
 
     def ne(value: String): QueryClause = QueryClause(new QueryPart {
-      override def q: String = _q + s""" != $value"""
+      override def q: String = query + s""" != $value"""
     })
 
     def `_==`(value: String) = eq(value)
@@ -42,12 +42,12 @@ package object querydsl {
   }
 
   case class QueryClause(parent: QueryPart) extends QueryPart {
-    private lazy val _q = parent.q
+    private lazy val query = parent.q
 
-    override def q() = _q
+    override def q() = query
 
     def RETURN(ref: String): QueryClause = QueryClause(new QueryPart {
-      override def q: String = _q + s""" RETURN $ref"""
+      override def q: String = query + s""" RETURN $ref"""
     })
 
     def toQuery(): String = parent.q
