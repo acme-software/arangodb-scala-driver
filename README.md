@@ -7,9 +7,7 @@ arangodb-scala-driver
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8196588199ae4f1993bc92d82f4683a5)](https://www.codacy.com/app/frne/arangodb-scala-driver?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=acme-software/arangodb-scala-driver&amp;utm_campaign=Badge_Grade) 
 ![GitHub](https://img.shields.io/github/license/acme-software/arangodb-scala-driver.svg) 
 
-**Ideomatic [ArangoDB](https://www.arangodb.com) driver for [Scala](https://scala-lang.org). Right now, it's basically 
-the [arangodb-driver-java-async](https://github.com/arangodb/arangodb-java-driver-async), wrapped into a tagless-final 
-DSL `F[_]`.**
+**Idiomatic [ArangoDB](https://www.arangodb.com) driver for [Scala](https://scala-lang.org) as Tagless-Final DSL.**
 
 *This library is under heavy development until v1.0.0 and therefore not ready for production!*
 
@@ -60,12 +58,23 @@ object Main extends IOApp {
 }
 ```
 
+Features
+--------
+
+* Tagless final DSL. Choose your own effect type.
+* Scala `2.11`, `2.12` and `2.13 (planned)`
+* Wraps the official [arangodb-java-driver-async](https://github.com/arangodb/arangodb-java-driver-async) and therefore 
+supports a wide range of ArangoDB versions
+* Fully async & non-blocking (just provide custom `ExecutionContext` to do so)
+* Supports Scala types like `Option[T]`, `Iterable[T]`, etc.
+* Simple case class mapping by using third-party JSON library of choice
+
 Usage
 -----
 
 ### Installation
 
-Add dependencies to SBT build:
+Add dependency to SBT build:
 
 ```scala
 libraryDependencies ++= Seq(

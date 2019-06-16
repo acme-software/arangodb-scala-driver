@@ -1,12 +1,12 @@
 language: scala
 
 scala:
+  - 2.11.12
   - 2.12.8
   - 2.13.0
 
 jdk:
   - openjdk8
-  - oraclejdk8
   - openjdk11
 
 env:
@@ -26,8 +26,6 @@ matrix:
   # only run 2.13 build on openjdk8 wirth arango 3.4 as long as it doesn't compile
   exclude:
     - scala: 2.13.0
-      jdk: oraclejdk8
-    - scala: 2.13.0
       jdk: openjdk11
     - scala: 2.13.0
       env: ARANGO_VERSION=3.3
@@ -37,4 +35,15 @@ before_install:
   - "docker run -d -e ARANGO_ROOT_PASSWORD=root -p 127.0.0.1:8529:8529 arangodb:$ARANGO_VERSION"
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION test
+  - sbt ++$TRAVIS_SCALA_VERSION test integrationtest/test
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt
+
+before_cache:
+  # Cleanup the cached directories to avoid unnecessary cache updates
+  - rm -fv $HOME/.ivy2/.sbt.ivy.lock
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt        -name "*.lock"               -print -delete

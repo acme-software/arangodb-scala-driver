@@ -2,6 +2,7 @@ package ch.acmesoftware
 
 import java.util.concurrent.CompletableFuture
 
+import cats.implicits._
 import cats.effect.Async
 import com.arangodb.entity.DocumentDeleteEntity
 
@@ -9,6 +10,7 @@ import scala.collection.JavaConverters._
 import scala.compat.java8.FutureConverters._
 import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
+import scala.util.{Either, Failure, Right, Success, Try}
 
 package object arangodbscaladriver {
 
@@ -39,4 +41,12 @@ package object arangodbscaladriver {
       }
   }
 
+  implicit class Scala211TryOps[T](in: Try[T]) {
+
+    /** Scala 2.11 compat */
+    def toEither: Either[Throwable, T] = in match {
+      case Success(value) => Right(value)
+      case Failure(exception) => Left(exception)
+    }
+  }
 }
