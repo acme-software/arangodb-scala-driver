@@ -1,6 +1,7 @@
 package ch.acmesoftware.arangodbscaladriver
 
 import cats.effect.Async
+import cats.implicits._
 import com.arangodb.ArangoDBAsync
 import com.{arangodb => ar}
 
@@ -47,10 +48,7 @@ private[arangodbscaladriver] object ArangoDB {
       dbFuture.onComplete(e => cb(e.toEither.map(ArangoDatabase.interpreter(_))))
     }
 
-    override def dbExists(name: String): F[Boolean] = Async[F].async { cb =>
-      wrapped.db(name).exists().toScala
-        .map(Boolean.unbox)
-        .onComplete(e => cb(e.toEither))
-    }
+    override def dbExists(name: String): F[Boolean] = asyncF(
+      wrapped.db(name).exists()).map(Boolean.unbox)
   }
 }
