@@ -26,7 +26,7 @@ class ArangoDBSpec extends FlatSpec with Matchers with MockFactory {
 
     val res = sut.db("test").unsafeRunSync()
 
-    res.name() shouldEqual "test"
+    res.name shouldEqual "test"
   }
 
   it should "create DB if not exists" in {
@@ -45,7 +45,7 @@ class ArangoDBSpec extends FlatSpec with Matchers with MockFactory {
 
     val res = sut.db("test").unsafeRunSync()
 
-    res.name() shouldEqual "test"
+    res.name shouldEqual "test"
   }
 
   it should "provide access to underlying driver" in {

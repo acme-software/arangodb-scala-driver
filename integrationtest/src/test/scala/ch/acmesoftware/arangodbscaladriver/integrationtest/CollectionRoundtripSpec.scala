@@ -14,13 +14,13 @@ class CollectionRoundtripSpec extends FlatSpec with Matchers {
 
       db <- arango.db("test-db")
 
-      dbName = db.name()
+      dbName = db.name
 
       collection <- db.collection("test-collection")
 
-      colName = collection.name()
+      colName = collection.name
 
-      _ <- db.drop()
+      _ <- db.drop
 
       dbExistsAfterDrop <- arango.dbExists("test-db")
 

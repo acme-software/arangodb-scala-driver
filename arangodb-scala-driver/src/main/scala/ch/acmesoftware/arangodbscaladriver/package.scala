@@ -5,6 +5,7 @@ import java.util.concurrent.CompletableFuture
 import cats.effect.Async
 import com.arangodb.entity.DocumentDeleteEntity
 
+import scala.collection.JavaConverters._
 import scala.compat.java8.FutureConverters._
 import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
@@ -24,6 +25,9 @@ package object arangodbscaladriver {
         .map(_ => ())
         .onComplete(e => cb(e.toEither))
     }
+
+  def valueMapAnyToJava(in: Map[String, Any]): java.util.Map[java.lang.String, java.lang.Object] =
+    in.mapValues(_.asInstanceOf[AnyRef]).asJava
 
   implicit class DocumentDeleteEntityOps(in: DocumentDeleteEntity[String]) {
 

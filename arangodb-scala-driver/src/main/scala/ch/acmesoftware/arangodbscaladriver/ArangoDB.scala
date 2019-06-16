@@ -8,6 +8,10 @@ import scala.compat.java8.FutureConverters._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.higherKinds
 
+/** Scala wrapper for [[ar.ArangoDBAsync]]
+  *
+  * @tparam F The effect type
+  */
 trait ArangoDB[F[_]] {
 
   /** Access to underlying java driver */

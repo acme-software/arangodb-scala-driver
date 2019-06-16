@@ -47,10 +47,10 @@ trait ArangoCollection[F[_]] {
     *
     * @return The wrapped [[ArangoDatabase]] which contains this collection
     */
-  def db(): ArangoDatabase[F]
+  def db: ArangoDatabase[F]
 
   /** Returns the collections name */
-  def name(): String
+  def name: String
 
   /** Inserts a document into the collection
     *
@@ -228,10 +228,10 @@ private[arangodbscaladriver] object ArangoCollection {
 
     override def unwrap: ArangoCollectionAsync = wrapped
 
-    override def db(): ArangoDatabase[F] =
+    override def db: ArangoDatabase[F] =
       ArangoDatabase.interpreter(wrapped.db())
 
-    override def name(): String =
+    override def name: String =
       wrapped.name()
 
     override def insertDocument[T](document: T,
