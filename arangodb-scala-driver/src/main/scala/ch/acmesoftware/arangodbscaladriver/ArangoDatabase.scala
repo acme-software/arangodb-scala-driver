@@ -2,7 +2,7 @@ package ch.acmesoftware.arangodbscaladriver
 
 import cats.effect.Async
 import cats.implicits._
-import com.arangodb.entity.{ArangoDBVersion, CollectionEntity, DatabaseEntity}
+import com.arangodb.entity._
 import com.arangodb.model.CollectionCreateOptions
 import com.arangodb.{ArangoCollectionAsync, ArangoDatabaseAsync}
 import com.{arangodb => ar}
@@ -29,7 +29,11 @@ trait ArangoDatabase[F[_]] {
   /** Returns arango version details */
   def version: F[ArangoDBVersion]
 
-  /** Returns true if the database exists */
+  /** Returns true if the database exists
+    *
+    * @see [[create]]
+    * @see [[drop]]
+    */
   def exists: F[Boolean]
 
   /** Returns a list of all accessible datbases */
@@ -39,19 +43,55 @@ trait ArangoDatabase[F[_]] {
   def collection(name: String,
                  createOptions: Option[CollectionCreateOptions] = None): F[ArangoCollection[F]]
 
+  /** Returns all collections */
   def collections: F[Iterable[CollectionEntity]]
+
+  /** Returns an index for the given id */
+  def index(id: String): F[Option[IndexEntity]]
+
+  /** Deletes an index */
+  def deleteIndex(id: String): F[Unit]
+
+  /** Creates the database on server
+    *
+    * @see [[exists]]
+    * @see [[drop]]
+    */
+  def create: F[Unit]
+
+  /** Drops the database
+    *
+    * @see [[exists]]
+    * @see [[create]]
+    */
+  def drop: F[Unit]
+
+  /** Grants access to the database dbname for user user. You need permission to the _system database in order to
+    * execute this call.
+    */
+  def grantAccess(user: String, permissions: Permissions = Permissions.RW): F[Unit]
+
+  /** Revokes access to the database dbname for user user. You need permission to the _system database in order to
+    * execute this call.
+    */
+  def revokeAccess(user: String): F[Unit] = grantAccess(user, Permissions.NONE)
+
+  /** Clear the database access level, revert back to the default access level.
+    */
+  def resetAccess(user: String): F[Unit]
+
+  /** Sets the default access level for collections within this database for the user user. You need
+    * permission to the _system database in order to execute this call.
+    */
+  def grantDefaultCollectionAccess(user: String, permissions: Permissions): F[Unit]
+
+  def permissions(user: String): F[Option[Permissions]]
 
   /** Returns db info
     *
     * @see com.arangodb.ArangoDatabase#getInfo()
     */
   def info: F[DatabaseEntity]
-
-  /** Drops the database
-    *
-    * @see com.arangodb.ArangoDatabase#drop()
-    */
-  def drop: F[Unit]
 
 
 }
@@ -102,12 +142,34 @@ private[arangodbscaladriver] object ArangoDatabase {
       asyncF(wrapped.getCollections)
         .map(_.asScala)
 
-    override def info: F[DatabaseEntity] =
-      asyncF(wrapped.getInfo)
+    override def index(id: String): F[Option[IndexEntity]] =
+      asyncF(wrapped.getIndex(id))
+        .map(Option.apply)
+
+    override def deleteIndex(id: String): F[Unit] =
+      discardedAsyncF(wrapped.deleteIndex(id))
+
+    override def create: F[Unit] =
+      discardedAsyncF(wrapped.create())
 
     override def drop: F[Unit] =
       discardedAsyncF(wrapped.drop())
 
+    override def grantAccess(user: String, permissions: Permissions): F[Unit] =
+      discardedAsyncF(wrapped.grantAccess(user, permissions))
+
+    override def resetAccess(user: String): F[Unit] =
+      discardedAsyncF(wrapped.resetAccess(user))
+
+    override def grantDefaultCollectionAccess(user: String, permissions: Permissions): F[Unit] =
+      discardedAsyncF(wrapped.grantDefaultCollectionAccess(user, permissions))
+
+    override def permissions(user: String): F[Option[Permissions]] =
+      asyncF(wrapped.getPermissions(user))
+        .map(Option.apply)
+
+    override def info: F[DatabaseEntity] =
+      asyncF(wrapped.getInfo)
 
   }
 }
